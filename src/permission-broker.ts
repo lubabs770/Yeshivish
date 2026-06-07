@@ -45,6 +45,17 @@ export class PermissionBroker {
       return { behavior: "allow" };
     }
 
+    // Confirmations are handled one at a time; a single SMS YES/NO can't
+    // disambiguate multiple concurrent requests, so deny immediately if one
+    // is already in flight.
+    if (this.pending) {
+      return {
+        behavior: "deny",
+        message:
+          "Another confirmation is already pending; please answer it first.",
+      };
+    }
+
     const allowed = await this.ask(describeTool(toolName, input));
     return allowed
       ? { behavior: "allow" }
@@ -53,9 +64,11 @@ export class PermissionBroker {
 
   private ask(summary: string): Promise<boolean> {
     const timeoutMs = this.deps.timeoutMs ?? 5 * 60 * 1000;
-    void this.deps.send(
+    this.deps.send(
       `⚠️ Claude wants to run ${summary} — reply YES to allow, NO to deny.`,
-    );
+    ).catch((err: unknown) => {
+      console.error("Failed to send confirmation prompt:", err);
+    });
     return new Promise<boolean>((resolve) => {
       const timer = setTimeout(() => {
         this.pending = null;

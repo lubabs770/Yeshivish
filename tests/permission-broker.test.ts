@@ -51,4 +51,31 @@ describe("PermissionBroker", () => {
     const { broker } = makeBroker();
     expect(broker.resolvePending(true)).toBe(false);
   });
+
+  it("denies a second concurrent request while one is pending, without sending", async () => {
+    const { broker, sent } = makeBroker();
+    const p1 = broker.canUseTool("Bash", { command: "ls" }, {});
+    await Promise.resolve();
+    expect(broker.hasPending()).toBe(true);
+    const sentCount = sent.length;
+    const res2 = await broker.canUseTool("Write", { file_path: "/x" }, {});
+    expect(res2.behavior).toBe("deny");
+    expect(sent.length).toBe(sentCount); // nothing extra sent
+    broker.resolvePending(true);
+    expect(await p1).toEqual({ behavior: "allow" });
+  });
+
+  it("logs and does not throw when send rejects", async () => {
+    const errors: unknown[] = [];
+    const spy = vi.spyOn(console, "error").mockImplementation((...a) => { errors.push(a); });
+    const broker = new PermissionBroker({
+      send: async () => { throw new Error("network down"); },
+      autoAllowReadTools: true,
+      timeoutMs: 30,
+    });
+    const res = await broker.canUseTool("Bash", { command: "ls" }, {}); // times out -> deny
+    expect(res.behavior).toBe("deny");
+    expect(errors.length).toBeGreaterThan(0);
+    spy.mockRestore();
+  });
 });
