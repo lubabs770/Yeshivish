@@ -131,7 +131,7 @@ backoff.
 
 ## Configuration
 
-### `config.yaml` (gitignored)
+### `config.yaml` (gitignored) // add a template that is not ignored
 Single human-editable file, loaded and validated at startup:
 
 ```yaml
