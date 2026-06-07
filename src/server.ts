@@ -9,9 +9,14 @@ export interface ServerDeps {
   onCallback: (payload: GroupMeCallback) => void;
 }
 
-function isLocal(req: http.IncomingMessage): boolean {
-  const addr = req.socket.remoteAddress ?? "";
+// True only for loopback peers. The GUI/config routes carry secrets, so they
+// are restricted to this set even though the listener may bind more broadly.
+export function isLocalAddress(addr: string): boolean {
   return addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
+}
+
+function isLocal(req: http.IncomingMessage): boolean {
+  return isLocalAddress(req.socket.remoteAddress ?? "");
 }
 
 function readBody(req: http.IncomingMessage): Promise<string> {

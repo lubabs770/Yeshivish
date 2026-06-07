@@ -49,6 +49,10 @@ function onCallback(payload: GroupMeCallback): void {
       return;
     }
     case "prompt":
+      // Note: hasPending() is only true once a queued turn reaches a risky
+      // canUseTool call. A "yes"/"no" texted before that window is routed here
+      // as a prompt and queued behind the running turn; it can't double-approve
+      // because the broker denies a second concurrent confirmation request.
       queue.enqueue(async (signal) => {
         try {
           const { text } = await runTurn(decision.text, {
@@ -76,7 +80,10 @@ const server = createServer({
   onCallback,
 });
 
-server.listen(config.server.port, () => {
+// Bind to loopback only. cloudflared connects from localhost, so the public
+// callback still works through the tunnel, but the port is not exposed on the
+// LAN directly (the GUI's secrets stay behind both the bind and the IP guard).
+server.listen(config.server.port, "127.0.0.1", () => {
   console.log(`yeshivish listening on http://localhost:${config.server.port}`);
   console.log(`Config GUI: http://localhost:${config.server.port}/`);
 });

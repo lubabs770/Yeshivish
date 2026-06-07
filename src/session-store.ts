@@ -13,10 +13,15 @@ const EMPTY: State = { currentSessionId: null, recent: [] };
 export class SessionStore {
   private state: State;
   constructor(private path: string) {
-    this.state =
-      existsSync(path)
-        ? (JSON.parse(readFileSync(path, "utf8")) as State)
-        : { ...EMPTY };
+    this.state = { ...EMPTY };
+    if (existsSync(path)) {
+      try {
+        this.state = JSON.parse(readFileSync(path, "utf8")) as State;
+      } catch (err) {
+        // A truncated/corrupt state file shouldn't crash startup; start fresh.
+        console.error(`Ignoring unreadable session state at ${path}:`, err);
+      }
+    }
   }
 
   private save(): void {

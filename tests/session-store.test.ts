@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SessionStore } from "../src/session-store.js";
@@ -48,5 +48,12 @@ describe("SessionStore", () => {
     store.recordCompleted("a");
     expect(store.resume("a")).toBe("a");
     expect(store.resume("zzz")).toBeNull();
+  });
+
+  it("recovers from a corrupt state file instead of throwing", () => {
+    writeFileSync(path, "{ this is not valid json");
+    const store = new SessionStore(path);
+    expect(store.currentSessionId()).toBeNull();
+    expect(store.listRecent(5)).toEqual([]);
   });
 });

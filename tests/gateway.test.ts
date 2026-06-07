@@ -57,4 +57,14 @@ describe("decide", () => {
   it("ignores empty/null text", () => {
     expect(decide(msg({ text: null }), deps()).kind).toBe("ignore");
   });
+
+  it("bounds the seen set, evicting the oldest id past the limit", () => {
+    const d = deps();
+    // Feed more ids than the 1000-entry cap; the set must stay bounded.
+    for (let i = 0; i < 1100; i++) decide(msg({ id: `m${i}` }), d);
+    expect(d.seen.size).toBeLessThanOrEqual(1000);
+    // The oldest ids were evicted, so they are no longer deduped.
+    expect(d.seen.has("m0")).toBe(false);
+    expect(d.seen.has("m1099")).toBe(true);
+  });
 });

@@ -2,6 +2,10 @@
 import type { Config, GroupMeCallback, Decision } from "./types.js";
 import { isCommand } from "./commands.js";
 
+// Cap on remembered message ids for dedupe. The process is long-running, so the
+// `seen` set is pruned (oldest-first; Sets keep insertion order) to bound memory.
+const SEEN_LIMIT = 1000;
+
 // Decide what to do with an incoming GroupMe callback. Order matters:
 // authorization and loop-prevention first, then dedupe, then routing.
 export function decide(
@@ -14,6 +18,9 @@ export function decide(
   }
   if (deps.seen.has(payload.id)) return { kind: "ignore" };
   deps.seen.add(payload.id);
+  if (deps.seen.size > SEEN_LIMIT) {
+    deps.seen.delete(deps.seen.values().next().value as string);
+  }
 
   const text = (payload.text ?? "").trim();
   if (!text) return { kind: "ignore" };

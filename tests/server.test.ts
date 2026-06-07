@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import type { AddressInfo } from "node:net";
-import { createServer } from "../src/server.js";
+import { createServer, isLocalAddress } from "../src/server.js";
 
 const cfg = {
   server: { port: 0 },
@@ -48,5 +48,19 @@ describe("createServer", () => {
     });
     expect(saveConfig).toHaveBeenCalledOnce();
     expect(saveConfig.mock.calls[0][0].groupme.bot_id).toBe("NEW");
+  });
+});
+
+describe("isLocalAddress (GUI guard)", () => {
+  it("accepts loopback addresses", () => {
+    expect(isLocalAddress("127.0.0.1")).toBe(true);
+    expect(isLocalAddress("::1")).toBe(true);
+    expect(isLocalAddress("::ffff:127.0.0.1")).toBe(true);
+  });
+
+  it("rejects non-loopback and empty addresses", () => {
+    expect(isLocalAddress("192.168.1.50")).toBe(false);
+    expect(isLocalAddress("10.0.0.2")).toBe(false);
+    expect(isLocalAddress("")).toBe(false);
   });
 });
