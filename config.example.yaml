@@ -1,0 +1,15 @@
+groupme:
+  access_token: ""       # GroupMe API token (dev.groupme.com)
+  bot_id: ""             # returned from POST /bots
+  group_id: ""           # the group the bot lives in
+  allowed_sender_id: ""  # ONLY this GroupMe user can drive the agent
+agent:
+  workspace_dir: "~/yeshivish-workspace"  # agent runs confined here
+  model: "claude-opus-4-8"
+  max_turns: 30
+  auto_allow_read_tools: true   # reads auto-approved; writes/Bash require YES
+server:
+  port: 8787             # local callback + config GUI port
+tunnel:
+  mode: "named"          # named (stable URL) | quick
+  hostname: ""           # public hostname for the named tunnel
