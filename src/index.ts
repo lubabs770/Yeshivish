@@ -1,4 +1,5 @@
 // src/index.ts
+import { copyFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { loadConfig, saveConfig as writeConfig, validateConfig } from "./config.js";
@@ -15,12 +16,21 @@ import { createServer } from "./server.js";
 import { startTunnel } from "./tunnel.js";
 
 const CONFIG_PATH = join(process.cwd(), "config.yaml");
+const EXAMPLE_PATH = join(process.cwd(), "config.example.yaml");
 const STATE_PATH = join(process.cwd(), "state.json");
+
+// First run: seed config.yaml from the committed template so the server can
+// boot and the user can fill in the blanks via the GUI instead of hitting a
+// crash before anything starts.
+if (!existsSync(CONFIG_PATH)) {
+  copyFileSync(EXAMPLE_PATH, CONFIG_PATH);
+  console.log(`No config.yaml found; created one from the template at ${CONFIG_PATH}.`);
+}
 
 let config: Config = loadConfig(CONFIG_PATH);
 const problems = validateConfig(config);
 if (problems.length) {
-  console.warn("Config incomplete; open the GUI to fix:\n  " + problems.join("\n  "));
+  console.warn("Config incomplete; open the GUI to fill it in:\n  " + problems.join("\n  "));
 }
 
 bootstrapWorkspace(config.agent.workspace_dir);
