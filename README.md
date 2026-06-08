@@ -4,10 +4,18 @@ Drive a Claude Code agent on this PC by texting a GroupMe group. See the design
 and plan in `docs/superpowers/`.
 
 ## Quick install
+One command — clones, installs, starts the server, and opens the config GUI at
+http://localhost:8787/ :
 ```sh
-git clone https://github.com/lubabs770/Yeshivish.git ~/yeshivish && cd ~/yeshivish && npm install && cp config.example.yaml config.yaml
+curl -fsSL https://raw.githubusercontent.com/lubabs770/Yeshivish/main/install.sh | bash
 ```
-Then follow the tunnel + GroupMe steps under [One-time setup](#one-time-setup) and run `npm start`.
+Or clone first and run it yourself:
+```sh
+git clone https://github.com/lubabs770/Yeshivish.git ~/yeshivish && cd ~/yeshivish && ./install.sh
+```
+The browser pops open on port 8787; fill in the form, then finish the tunnel +
+GroupMe steps under [One-time setup](#one-time-setup). (Override the location or
+port with `YESHIVISH_DIR=…` / `PORT=…`.)
 
 ## Prerequisites
 - Node 20+ (developed on 24)
