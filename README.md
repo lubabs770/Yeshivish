@@ -9,12 +9,11 @@ http://localhost:8787/ :
 ```sh
 curl -fsSL https://raw.githubusercontent.com/lubabs770/Yeshivish/main/install.sh | bash
 ```
-Or clone first and run it yourself:
-```sh
-git clone https://github.com/lubabs770/Yeshivish.git ~/yeshivish && cd ~/yeshivish && ./install.sh
-```
+
 The browser pops open on port 8787; fill in the form, then finish the tunnel +
-GroupMe steps under [One-time setup](#one-time-setup). (Override the location or
+GroupMe steps under [One-time setup](#one-time-setup).
+
+(Override the location or
 port with `YESHIVISH_DIR=…` / `PORT=…`.)
 
 ## Prerequisites
