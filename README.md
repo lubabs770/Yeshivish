@@ -40,5 +40,24 @@ GroupMe steps under [One-time setup](#one-time-setup).
 - Text the group: a plain message runs the agent; `/help` lists commands.
 - Risky actions (writes, Bash) text you a YES/NO prompt — reply `YES` to allow.
 
+## Keeping it alive (`guard.sh`)
+`npm start` dies if it crashes, the terminal closes, or (in quick-tunnel mode) the
+machine sleeps — and each restart hands out a new tunnel URL. `guard.sh` wraps it:
+it runs the bot detached in the background, **auto-restarts it forever** if it ever
+exits, and on macOS **`caffeinate`s the machine** so it won't idle-sleep while up.
+
+```sh
+./guard.sh start      # launch in background; caffeinated (macOS)
+./guard.sh status     # is it up? prints the current public tunnel URL
+./guard.sh logs       # follow the live log
+./guard.sh stop       # stop it (and let the machine sleep again)
+./guard.sh restart
+```
+
+It locates itself, so it works from wherever you cloned the repo. State (pid + log)
+lives in `~/.yeshivish/`. Overrides: `YESHIVISH_DIR`, `YESHIVISH_CMD`,
+`YESHIVISH_RESTART_DELAY`. Note: `caffeinate` cannot defeat lid-close (clamshell)
+sleep on battery — that's enforced by hardware.
+
 ## Commands
 `/new`, `/resume [id]`, `/sessions`, `/stop`, `/help`
