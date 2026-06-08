@@ -13,8 +13,6 @@ curl -fsSL https://raw.githubusercontent.com/lubabs770/Yeshivish/main/install.sh
 The browser pops open on port 8787; fill in the form, then finish the tunnel +
 GroupMe steps under [One-time setup](#one-time-setup).
 
-(Override the location or
-port with `YESHIVISH_DIR=…` / `PORT=…`.)
 
 ## Prerequisites
 - Node 20+ (developed on 24)
