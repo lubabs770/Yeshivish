@@ -3,6 +3,12 @@
 Drive a Claude Code agent on this PC by texting a GroupMe group. See the design
 and plan in `docs/superpowers/`.
 
+## Quick install
+```sh
+git clone https://github.com/lubabs770/Yeshivish.git ~/yeshivish && cd ~/yeshivish && npm install && cp config.example.yaml config.yaml
+```
+Then follow the tunnel + GroupMe steps under [One-time setup](#one-time-setup) and run `npm start`.
+
 ## Prerequisites
 - Node 20+ (developed on 24)
 - A Claude Code login or `ANTHROPIC_API_KEY` in your environment
