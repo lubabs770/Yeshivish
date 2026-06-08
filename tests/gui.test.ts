@@ -6,6 +6,8 @@ const cfg = {
   agent: { workspace_dir: "/ws", model: "m", max_turns: 30, auto_allow_read_tools: true },
   server: { port: 8787 },
   tunnel: { mode: "named", hostname: "h" },
+  ingest: { mode: "webhook" },
+  poll: { idle_ms: 10000, active_ms: 1000, decay_ms: 15000 },
 } as any;
 
 describe("renderConfigForm", () => {
@@ -14,6 +16,13 @@ describe("renderConfigForm", () => {
     expect(html).toContain("<form");
     expect(html).toContain('value="B"'); // bot_id
     expect(html).toContain('name="groupme.bot_id"');
+  });
+
+  it("renders the ingest mode select and poll interval fields", () => {
+    const html = renderConfigForm(cfg);
+    expect(html).toContain('name="ingest.mode"');
+    expect(html).toContain('name="poll.idle_ms"');
+    expect(html).toContain('value="1000"'); // poll.active_ms
   });
 });
 
@@ -40,6 +49,20 @@ describe("formBodyToConfig", () => {
     expect(next.agent.auto_allow_read_tools).toBe(true);
     expect(next.server.port).toBe(9000);
     expect(next.tunnel.mode).toBe("quick");
+  });
+
+  it("maps ingest mode and poll intervals, coercing intervals to numbers", () => {
+    const next = formBodyToConfig(
+      {
+        "ingest.mode": "poll",
+        "poll.idle_ms": "5000",
+        "poll.active_ms": "500",
+        "poll.decay_ms": "8000",
+      } as any,
+      cfg,
+    );
+    expect(next.ingest.mode).toBe("poll");
+    expect(next.poll).toEqual({ idle_ms: 5000, active_ms: 500, decay_ms: 8000 });
   });
 
   it("treats a missing checkbox as false", () => {

@@ -10,6 +10,12 @@ agent:
   auto_allow_read_tools: true   # reads auto-approved; writes/Bash require YES
 server:
   port: 8787             # local callback + config GUI port
+ingest:
+  mode: "webhook"        # webhook (cloudflared tunnel) | poll (no public endpoint)
+poll:                    # used only when ingest.mode is "poll"
+  idle_ms: 10000         # poll spacing while the chat is quiet
+  active_ms: 1000        # faster spacing after activity / while awaiting a YES/NO
+  decay_ms: 15000        # return to idle after this much silence
 tunnel:
   mode: "named"          # named (stable URL) | quick
   hostname: ""           # public hostname for the named tunnel

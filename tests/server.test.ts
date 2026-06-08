@@ -7,6 +7,8 @@ const cfg = {
   groupme: { access_token: "T", bot_id: "B", group_id: "G", allowed_sender_id: "U" },
   agent: { workspace_dir: "/ws", model: "m", max_turns: 5, auto_allow_read_tools: true },
   tunnel: { mode: "named", hostname: "h" },
+  ingest: { mode: "webhook" },
+  poll: { idle_ms: 10000, active_ms: 1000, decay_ms: 15000 },
 } as any;
 
 let server: any;
