@@ -17,8 +17,19 @@ GroupMe steps under [One-time setup](#one-time-setup).
 ## Prerequisites
 - Node 20+ (developed on 24)
 - A Claude Code login or `ANTHROPIC_API_KEY` in your environment
-- `cloudflared` installed: `brew install cloudflared`
+- `cloudflared` installed: `brew install cloudflared` — **only needed for webhook mode** (see Ingest modes)
 - A GroupMe account + API token from https://dev.groupme.com
+
+## Ingest modes
+Yeshivish can receive messages two ways, set by `ingest.mode` in `config.yaml`:
+
+- **`webhook`** (default): GroupMe POSTs each message to a public callback URL,
+  exposed via a `cloudflared` tunnel. Lowest latency; requires the tunnel setup below.
+- **`poll`**: Yeshivish reads the GroupMe API on an adaptive timer (fast right
+  after activity or while a YES/NO is pending, slow when quiet — tune with
+  `poll.idle_ms` / `active_ms` / `decay_ms`). **No public endpoint, no tunnel, no
+  cloudflared.** Set `ingest.mode: poll` and skip steps 3–4 below; you don't need
+  a bot `callback_url`. Latency is `active_ms` (default 1s) while you're chatting.
 
 ## One-time setup
 1. `npm install`
@@ -36,7 +47,7 @@ GroupMe steps under [One-time setup](#one-time-setup).
 6. Run `npm start`, open http://localhost:8787/, and fill in the config form.
 
 ## Running
-- `npm start` — starts the server and (if configured) the cloudflared tunnel.
+- `npm start` — starts the server, plus the cloudflared tunnel (webhook mode) or the API poller (poll mode).
 - Text the group: a plain message runs the agent; `/help` lists commands.
 - Risky actions (writes, Bash) text you a YES/NO prompt — reply `YES` to allow.
 

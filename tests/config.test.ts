@@ -32,6 +32,21 @@ describe("loadConfig", () => {
     expect(cfg.groupme.bot_id).toBe("B");
     expect(cfg.agent.workspace_dir).toBe(join(homedir(), "ws"));
   });
+
+  it("defaults ingest and poll when an older config omits them", () => {
+    const cfg = loadConfig(tmpFile(VALID));
+    expect(cfg.ingest.mode).toBe("webhook");
+    expect(cfg.poll).toEqual({ idle_ms: 10000, active_ms: 1000, decay_ms: 15000 });
+  });
+
+  it("preserves explicit ingest and poll values", () => {
+    const withPoll =
+      VALID +
+      `ingest: { mode: "poll" }\npoll: { idle_ms: 5000, active_ms: 500, decay_ms: 8000 }\n`;
+    const cfg = loadConfig(tmpFile(withPoll));
+    expect(cfg.ingest.mode).toBe("poll");
+    expect(cfg.poll.active_ms).toBe(500);
+  });
 });
 
 describe("validateConfig", () => {

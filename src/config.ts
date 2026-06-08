@@ -14,6 +14,10 @@ export function expandHome(p: string): string {
 export function loadConfig(path: string): Config {
   const cfg = yaml.load(readFileSync(path, "utf8")) as Config;
   cfg.agent.workspace_dir = expandHome(cfg.agent.workspace_dir);
+  // Backfill fields added after some config.yaml files were written, so older
+  // installs keep working without manual edits.
+  cfg.ingest ??= { mode: "webhook" };
+  cfg.poll ??= { idle_ms: 10000, active_ms: 1000, decay_ms: 15000 };
   return cfg;
 }
 

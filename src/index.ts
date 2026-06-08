@@ -14,6 +14,7 @@ import { TurnQueue } from "./turn-queue.js";
 import { bootstrapWorkspace } from "./sms-rules.js";
 import { createServer } from "./server.js";
 import { startTunnel } from "./tunnel.js";
+import { createPoller } from "./poller.js";
 
 const CONFIG_PATH = join(process.cwd(), "config.yaml");
 const EXAMPLE_PATH = join(process.cwd(), "config.example.yaml");
@@ -98,6 +99,19 @@ server.listen(config.server.port, "127.0.0.1", () => {
   console.log(`Config GUI: http://localhost:${config.server.port}/`);
 });
 
-const tunnel = startTunnel(config);
-if (tunnel) console.log(`cloudflared started (pid ${tunnel.pid}).`);
-else console.log("No tunnel started; run cloudflared manually (see README).");
+// Choose how inbound messages arrive. Poll mode reads the GroupMe API on a
+// timer and needs no public endpoint, so it skips the tunnel entirely; the
+// server keeps running for the localhost-only config GUI.
+if (config.ingest.mode === "poll") {
+  const poller = createPoller({
+    cfg: config,
+    onCallback,
+    broker: { hasPending: () => broker.hasPending() },
+  });
+  poller.start();
+  console.log("Ingest mode: poll (no tunnel; reading the GroupMe API on a timer).");
+} else {
+  const tunnel = startTunnel(config);
+  if (tunnel) console.log(`cloudflared started (pid ${tunnel.pid}).`);
+  else console.log("No tunnel started; run cloudflared manually (see README).");
+}

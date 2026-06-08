@@ -97,6 +97,8 @@ export function renderConfigForm(cfg: Config): string {
   const checked = cfg.agent.auto_allow_read_tools ? "checked" : "";
   const modeOpt = (v: string, label: string) =>
     `<option value="${v}"${cfg.tunnel.mode === v ? " selected" : ""}>${label}</option>`;
+  const ingestOpt = (v: string, label: string) =>
+    `<option value="${v}"${cfg.ingest.mode === v ? " selected" : ""}>${label}</option>`;
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -129,6 +131,18 @@ ${field("agent.max_turns", cfg.agent.max_turns, { label: "Max turns", type: "num
 <fieldset>
 <legend>Server</legend>
 ${field("server.port", cfg.server.port, { label: "Port", type: "number", hint: "Local callback + config GUI port." })}
+</fieldset>
+
+<fieldset>
+<legend>Ingest</legend>
+<label class="field">
+  <span class="field-label">Mode<code>ingest.mode</code></span>
+  <select name="ingest.mode">${ingestOpt("webhook", "Webhook (cloudflared tunnel)")}${ingestOpt("poll", "Poll (no public endpoint)")}</select>
+  <span class="hint">Poll reads the GroupMe API on a timer; no tunnel needed. Webhook needs the tunnel below.</span>
+</label>
+${field("poll.idle_ms", cfg.poll.idle_ms, { label: "Idle interval (ms)", type: "number", hint: "Poll spacing while the chat is quiet." })}
+${field("poll.active_ms", cfg.poll.active_ms, { label: "Active interval (ms)", type: "number", hint: "Faster spacing right after activity or while awaiting a YES/NO." })}
+${field("poll.decay_ms", cfg.poll.decay_ms, { label: "Decay (ms)", type: "number", hint: "Return to the idle interval after this much silence." })}
 </fieldset>
 
 <fieldset>
@@ -171,6 +185,14 @@ export function formBodyToConfig(
     tunnel: {
       mode: (body["tunnel.mode"] as "named" | "quick") ?? base.tunnel.mode,
       hostname: body["tunnel.hostname"] ?? base.tunnel.hostname,
+    },
+    ingest: {
+      mode: (body["ingest.mode"] as "webhook" | "poll") ?? base.ingest.mode,
+    },
+    poll: {
+      idle_ms: Number(body["poll.idle_ms"] ?? base.poll.idle_ms),
+      active_ms: Number(body["poll.active_ms"] ?? base.poll.active_ms),
+      decay_ms: Number(body["poll.decay_ms"] ?? base.poll.decay_ms),
     },
   };
 }

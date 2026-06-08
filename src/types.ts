@@ -13,6 +13,11 @@ export interface Config {
   };
   server: { port: number };
   tunnel: { mode: "named" | "quick"; hostname: string };
+  // How inbound messages reach us: a public webhook (via the tunnel) or by
+  // polling the GroupMe read API (no public endpoint needed).
+  ingest: { mode: "webhook" | "poll" };
+  // Adaptive polling cadence, used only in ingest.mode === "poll".
+  poll: { idle_ms: number; active_ms: number; decay_ms: number };
 }
 
 // The JSON GroupMe POSTs to the callback URL on every group message.
